@@ -2,9 +2,11 @@ from app import app
 from flask import render_template, flash, redirect, url_for
 from app.forms import LoginForm
 
+#Different pages
 @app.route('/')
 @app.route("/index")
 def index():
+    #Can do pythonic stuff here and then pass to html page
     user = {'username': 'John'}
     posts = [
         {
