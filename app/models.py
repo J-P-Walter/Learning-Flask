@@ -2,6 +2,7 @@ from app import db, login
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from hashlib import md5
 
 #flask db migrate -m "'table_name' table"
     #creates migration script
@@ -26,6 +27,11 @@ class User(UserMixin, db.Model):
         self.password_hash = generate_password_hash(password)
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    #Uses Gravatar to generate random, unique geometric images to be used as avatar image
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
     #Print function for debugging
     def __repr__(self):
