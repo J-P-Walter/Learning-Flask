@@ -21,6 +21,8 @@ class User(UserMixin, db.Model):
     #One-to-many relationship defined on the one side, 
     #First argument is model class, backref is name of field added, lazy comes later
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     #Set and check password functions using werkzeug
     def set_password(self, password):
