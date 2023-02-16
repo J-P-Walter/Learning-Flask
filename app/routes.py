@@ -27,7 +27,6 @@ def index():
 
 #before_request executed right before view function
 #checks if user is logged in, sets last_seen and updates database
-
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -93,7 +92,7 @@ def user(username):
     ]
     return render_template('user.html', user=user, posts=posts)
 
-@app.route('/edit_profile')
+@app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
     form = EditProfileForm()
