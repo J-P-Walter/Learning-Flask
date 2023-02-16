@@ -11,6 +11,12 @@ from hashlib import md5
 #flask db downgrade
     #undos last migration
 
+#Auxiliary table, no data other than foreign keys so doesn't need model class
+followers = db.Table(
+    'followers', 
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')), 
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id')))
+
 #UserMixin includes generic implementations that are appropriate for most user model classes
 class User(UserMixin, db.Model):
     #Column instances as class variables
@@ -24,6 +30,15 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
+    #Many-to-many, 
+    followed = db.relationship( 
+        'User',                                             #model class that parent class is related to, "right side"
+        secondary=followers,                                #configures the association table, found above
+        primaryjoin=(followers.c.follower_id == id),        #condition that links the parent class with association table, "left side"
+        secondaryjoin=(followers.c.followed_id == id),      #condition that links model class (ie User) with association table, "right side"
+        backref=db.backref('followers', lazy='dynamic'),    #define how accessed from right side
+        lazy='dynamic')
+
     #Set and check password functions using werkzeug
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -34,6 +49,30 @@ class User(UserMixin, db.Model):
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
+
+    #Following logic
+    #Can use append and remove due to SQLAlchemy ORM
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+    def is_following(self, user):
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
+
+    def followed_posts(self):
+        # join on followers and Post table by condition where followed_id == user_id
+        #filter where only results are where self is following
+        #order by timestamp
+        followed = Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+
+        #Query for own posts
+        own = Post.query.filter_by(user_id=self.id)
+        #Union for followed and own posts
+        return followed.union(own).order_by(Post.timestamp.desc())
 
     #Print function for debugging
     def __repr__(self):
@@ -54,3 +93,4 @@ class Post(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
