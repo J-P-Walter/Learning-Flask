@@ -47,3 +47,9 @@ class EditProfileForm(FlaskForm):
             user = User.query.filter_by(username=self.username.data).first()
             if user is not None:
                 raise ValidationError('Please use a different username')
+
+#Used for follow feature
+#Implemented as POST request, safer
+#GET requests should only be on actions that do not introduce state changes
+class EmptyForm(FlaskForm):
+    submit = SubmitField('Submit')
