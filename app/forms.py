@@ -30,6 +30,10 @@ class RegistrationForm(FlaskForm):
         if email is not None:
             raise ValidationError("Email already in use")
 
+class PostForm(FlaskForm):
+    post = TextAreaField("What are you thinking about?", validators=[DataRequired(), Length(min=1, max=140)])
+    submit = SubmitField('Submit')
+
 #Form to edit user profile: username and about me section
 #Saves previous username as original_username to you can leave username untouched
 #and there is no reason to check for duplicates

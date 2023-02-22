@@ -1,29 +1,30 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
-from app.models import User
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm
+from app.models import User, Post
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm, PostForm
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import datetime
 
 #Different pages
-@app.route('/')
-@app.route("/index")
+#Added methods for post form
+@app.route('/', methods=['GET', 'POST'])
+@app.route("/index", methods=['GET', 'POST'])
 @login_required #intercepts and redirects to 'login'
 def index():
     #Can do pythonic stuff here and then pass to html page
-    user = {'username': 'John'}
-    posts = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
-    ]
-    return render_template('index.html', title='Home Page', posts=posts)
+    form = PostForm()
+    if form.validate_on_submit():
+        #Create post and push to database
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash("Post now live")
+        #Standard practice to respond to post request with redirect
+        #Post/Redirect/Get pattern
+        return redirect(url_for('index'))
+    posts = current_user.followed_posts().all()
+    return render_template('index.html', title='Home Page', posts=posts, form=form)
 
 #before_request executed right before view function
 #checks if user is logged in, sets last_seen and updates database
@@ -86,10 +87,7 @@ def register():
 def user(username):
     #Queries database for username
     user = User.query.filter_by(username=username).first_or_404()
-    posts = [
-        {'author': user, 'body': 'Test post 1'},
-        {'author': user, 'body': 'Test post 2'}
-    ]
+    posts = Post.query.filter_by(user_id=user.id)
     #EmptyForm acts as unfollow button
     form = EmptyForm()
     return render_template('user.html', user=user, posts=posts, form=form)
