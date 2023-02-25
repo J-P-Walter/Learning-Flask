@@ -6,17 +6,32 @@ from flask_login import LoginManager
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+from flask_mail import Mail
+from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+#Flask Extensions:
 #Database object, SQLAlchemy database
 db = SQLAlchemy(app)
+
 #migration engine object
 migrate = Migrate(app, db)
+
 login = LoginManager(app)
+
 #used to have login-only view, add @login_required
 #under @app.route decorators
 login.login_view = 'login'
+
+#uses flask_mail to email users
+#Not focusing on email feature rn, 
+# TODO: come back later for this https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-x-email-support
+mail = Mail(app)
+
+#bootstrap for css
+bootstrap = Bootstrap(app)
 
 #Error handling when not in debug, 
 #Creates smtphandler, sets level to only report errors
