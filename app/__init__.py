@@ -9,7 +9,7 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-#Database object
+#Database object, SQLAlchemy database
 db = SQLAlchemy(app)
 #migration engine object
 migrate = Migrate(app, db)

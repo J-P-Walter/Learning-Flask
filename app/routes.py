@@ -23,8 +23,15 @@ def index():
         #Standard practice to respond to post request with redirect
         #Post/Redirect/Get pattern
         return redirect(url_for('index'))
-    posts = current_user.followed_posts().all()
-    return render_template('index.html', title='Home Page', posts=posts, form=form)
+    #request args accesses arguments given in query string
+    page = request.args.get('page', 1, type=int)
+    #gets Pagination object, contains list of items of requested page
+    #Can use attributes of Pag. object for navigation
+    posts = current_user.followed_posts().paginate(page=page, per_page=app.config['POSTS_PER_PAGE'], error_out=False)
+    #url_for auto applies keyword arguments to URL
+    next_url = url_for('index', page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('index', page=posts.prev_num) if posts.has_prev else None
+    return render_template('index.html', title='Home Page', posts=posts.items, form=form, next_url=next_url, prev_url=prev_url)
 
 #before_request executed right before view function
 #checks if user is logged in, sets last_seen and updates database
@@ -87,10 +94,13 @@ def register():
 def user(username):
     #Queries database for username
     user = User.query.filter_by(username=username).first_or_404()
-    posts = Post.query.filter_by(user_id=user.id)
+    page = request.args.get('page', 1, type=int)
+    posts = user.posts.order_by(Post.timestamp.desc()).paginate(page=page, per_page=app.config['POSTS_PER_PAGE'], error_out=False)
+    next_url = url_for('user', username=user.username, page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('user', username=user.username, page=posts.prev_num) if posts.has_prev else None
     #EmptyForm acts as unfollow button
     form = EmptyForm()
-    return render_template('user.html', user=user, posts=posts, form=form)
+    return render_template('user.html', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url, form=form)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -159,6 +169,9 @@ def unfollow(username):
 @app.route('/explore')
 @login_required
 def explore():
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    #references index template, reuse because of similarity
-    return render_template('index.html', title='Explore', posts=posts)
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(page=page, per_page=app.config['POSTS_PER_PAGE'], error_out=False)
+    next_url = url_for('explore', page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('explore', page=posts.prev_num) if posts.has_prev else None
+    return render_template("index.html", title='Explore', posts=posts.items,
+                          next_url=next_url, prev_url=prev_url)
