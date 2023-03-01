@@ -1,5 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 
+<!-- Title block from bootstrap -->
 {% block title %}
   {% if title %}
     {{ title }} - JP's Microblog
@@ -8,6 +9,9 @@
   {% endif %}
 {% endblock %}
 
+<!-- 
+  Navbar from bootstrap, don't fully understand, hope to learn more with time/might learn on my own 
+-->
 {% block navbar %}
     <nav class="navbar navbar-default">
         <div class="container">
@@ -53,4 +57,10 @@
     {% block app_content %}
     {% endblock %}
   </div>
+{% endblock %}
+
+<!-- Allows for moment.js to be included with everything -->
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
 {% endblock %}
