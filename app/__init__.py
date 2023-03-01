@@ -26,8 +26,6 @@ login = LoginManager(app)
 login.login_view = 'login'
 
 #uses flask_mail to email users
-#Not focusing on email feature rn, 
-# TODO: come back later for this https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-x-email-support
 mail = Mail(app)
 
 #bootstrap for css
@@ -64,11 +62,10 @@ bootstrap = Bootstrap(app)
 if not app.debug:
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    file_handeler = RotatingFileHandler('logs/microblog.log', maxBytes=10240, backupCount=10)
-    file_handeler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-    file_handeler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handeler)
-
+    file_handler = RotatingFileHandler('logs/microblog.log', maxBytes=10240, backupCount=10)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
     app.logger.setLevel(logging.INFO)
     app.logger.info('Microblog startup')
 
