@@ -7,6 +7,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 from app.email import send_password_reset_email
 from flask_babel import get_locale
+from langdetect import detect, LangDetectException
 
 #Different pages
 #Added methods for post form
@@ -17,8 +18,13 @@ def index():
     #Can do pythonic stuff here and then pass to html page
     form = PostForm()
     if form.validate_on_submit():
+        #Attempts to detect language from post
+        try:
+            language = detect(form.post.data)
+        except LangDetectException:
+            language = ""
         #Create post and push to database
-        post = Post(body=form.post.data, author=current_user)
+        post = Post(body=form.post.data, author=current_user, language=language)
         db.session.add(post)
         db.session.commit()
         flash("Post now live")

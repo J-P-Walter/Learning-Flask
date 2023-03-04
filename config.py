@@ -16,3 +16,6 @@ class Config(object):
     POSTS_PER_PAGE = 10
 
     LANGUAGES = ['en', 'es']
+
+    # Currently does not exist, as I don't want to give Microsoft my card
+    MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')

@@ -100,6 +100,7 @@ class Post(db.Model):
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #Foreign key, references id value from user table
+    language = db.Column(db.String(5))
 
     #Print function for debugging
     def __repr__(self):
