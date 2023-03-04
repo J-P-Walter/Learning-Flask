@@ -44,7 +44,6 @@ def get_locale():
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 babel.init_app(app, locale_selector=get_locale)
 
-
 #Error handling when not in debug, 
 #Creates smtphandler, sets level to only report errors
 #and attaches it to app.logger
