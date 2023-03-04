@@ -40,9 +40,10 @@ moment = Moment(app)
 #babel helps with langauge accessibility
 babel = Babel(app)
 #gets local language from browser header
-@babel.localeselector
 def get_locale():
     return request.accept_languages.best_match(app.config['LANGUAGES'])
+babel.init_app(app, locale_selector=get_locale)
+
 
 #Error handling when not in debug, 
 #Creates smtphandler, sets level to only report errors
